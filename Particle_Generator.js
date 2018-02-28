@@ -1,4 +1,4 @@
-"use strict";
+/// <reference path="./p5.global-mode.d.ts" />
 
 let particles = [];
 let master;
@@ -7,11 +7,11 @@ function setup(){
     frameRate(60);
     createCanvas(720, 480);    
     master = new Particles();
-    // Slider Div Daemon
-    document.getElementById("sliders").addEventListener("input", function(){master.updateSliders()});
     for (let i = 0; i <= 1; i++){
         particles.push(new Particle());
     }
+    // Slider Div Daemon
+    document.getElementById("sliders").addEventListener("input", function(){master.updateSliders();});
 }
 
 function mouseClicked(){
@@ -24,13 +24,7 @@ function draw(){
     render();
 }
 
-let points = []
-
-function passf(val){
-    return val;
-}
 function render(){
-
     // Particle Master Handler
     master.drawOrigin();
 
@@ -49,25 +43,26 @@ function render(){
 
 class Particles{
     constructor(){
-        this.origin = [width / 8 , height / 1.2];
-        // On sliders change update them
+        this.origin = [width / 2 , height / 2];
+
+        //Set min and max of particle direction
+        document.getElementById("Direction").max = Math.PI * 2;
+        
         this.updateSliders();
     }
 
     updateSliders(){
-        this.size = Number(document.getElementById("Size").value)
+        this.size = Number(document.getElementById("Size").value);
         this.gravity = Number(document.getElementById("Gravity").value);       
-        this.acceleration = Number(document.getElementById("Acceleration").value) 
-        this.velocity = Number(document.getElementById("Velocity").value)
-        this.direction = Number(document.getElementById("Direction").value)
-        this.generateOutput()
+        this.acceleration = Number(document.getElementById("Acceleration").value); 
+        this.direction = Number(document.getElementById("Direction").value);
+        this.generateOutput();
     }
 
     generateOutput(){
         document.getElementById("Size_D").innerHTML = ": " + this.size;
         document.getElementById("Gravity_D").innerHTML = ": " + this.gravity;
         document.getElementById("Acceleration_D").innerHTML = ": " + this.acceleration;
-        document.getElementById("Velocity_D").innerHTML = ": " + this.velocity;
         document.getElementById("Direction_D").innerHTML = ": " + this.direction;
     }
 
@@ -79,20 +74,29 @@ class Particles{
 
 class Particle{
     constructor(){
-        this.last = window.performance.now();
-        this.delta;
+        this.t0 = Date.now();        
         this.pos = {
             x: master.origin[0],
             y: master.origin[1]
         };
+        this.velocity = 0;
+    }
+
+    deletaTime(){
+        // Returns time in seconds
+        return (Date.now() - this.t0) / 1000;
+    }
+
+    updateVelocityVal(){
+        document.getElementById("velocity_val").innerHTML = this.velocity;
     }
 
     move(){
         this.delta = -this.last + (this.last = window.performance.now());
         
-        master.velocity += master.acceleration ;
-        this.pos.x += master.velocity * Math.sin(master.direction) ;
-        this.pos.y += (master.velocity) * Math.cos(master.direction) * master.gravity ;
+        this.velocity += master.acceleration ;
+        this.pos.x += this.velocity * -Math.sin(master.direction);
+        this.pos.y += (this.velocity  * Math.cos(master.direction)) + master.gravity;
     }
 
     get life(){
@@ -103,10 +107,21 @@ class Particle{
 
     draw(){
         ellipse(this.pos.x, this.pos.y, master.size);
+
+        // DEBUG
+        //Draw line showing direction of particle
+        let DEBUG = false;
+        if(DEBUG){
+            var x = this.pos.x;
+            var y = this.pos.y;
+            var sizeOfArrow = 50;
+            line(x, y, x + sizeOfArrow * -Math.sin(master.direction), y + sizeOfArrow * Math.cos(master.direction));
+        }
     }
 
     act(){
         this.move();
         this.draw();
+        this.updateVelocityVal();
     }
 }

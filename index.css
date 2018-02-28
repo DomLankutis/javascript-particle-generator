@@ -1,0 +1,9 @@
+.row {
+    width: 100%;
+}
+
+.block {
+    display: inline-block;
+    margin: 2%;
+    text-align: left
+}
