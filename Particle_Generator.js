@@ -1,4 +1,3 @@
-
 let particles = [];
 let master;
 
@@ -11,6 +10,14 @@ function setup(){
     }
     // Slider Div Daemon
     document.getElementById("sliders").addEventListener("input", function(){master.updateSliders();});
+    // Button Daemon
+    document.getElementById("buttons").addEventListener("click", function() {handleButtons();});
+}
+
+function handleButtons(){
+    let DEBUG = document.getElementById("DEBUG");
+    let drawOnTop = document.getElementById("drawOnTop");
+    let respawn = document.getElementById("respawn");
 }
 
 function mouseClicked(){
@@ -20,6 +27,9 @@ function mouseClicked(){
 }
 
 function draw(){
+    if(!drawOnTop.checked){
+        clear();
+    }
     render();
 }
 
@@ -31,10 +41,10 @@ function render(){
     if (particles.length != 0){
         for (let i = 0; i < particles.length; i++){
             if (particles[i].life == false){
-                particles.splice(i, 1);
-            }else{
-                particles[i].act();
-            }
+                if(respawn.checked){
+                    particles[i] = new Particle();
+                }else{ particles.splice(i, 1); } 
+            }else{ particles[i].act(); }
         }
     }
 }
@@ -52,6 +62,7 @@ class Particles{
 
     updateSliders(){
         this.size = Number(document.getElementById("Size").value);
+        this.initialVelocity = Number(document.getElementById("initVelocity").value);
         this.gravity = Number(document.getElementById("Gravity").value);       
         this.acceleration = Number(document.getElementById("Acceleration").value); 
         this.direction = Number(document.getElementById("Direction").value);
@@ -59,10 +70,11 @@ class Particles{
     }
 
     generateOutput(){
-        document.getElementById("Size_D").innerHTML = ": " + this.size;
-        document.getElementById("Gravity_D").innerHTML = ": " + this.gravity;
-        document.getElementById("Acceleration_D").innerHTML = ": " + this.acceleration;
-        document.getElementById("Direction_D").innerHTML = ": " + this.direction;
+        document.getElementById("Size_D").innerHTML = "  " + this.size;
+        document.getElementById("initVelocity_D").innerHTML = "  " + this.initialVelocity ;        
+        document.getElementById("Gravity_D").innerHTML = "  " + this.gravity;
+        document.getElementById("Acceleration_D").innerHTML = "  " + this.acceleration;
+        document.getElementById("Direction_D").innerHTML = "  " + this.direction;
     }
 
     drawOrigin(){
@@ -75,10 +87,14 @@ class Particle{
     constructor(){
         this.t0 = Date.now();        
         this.pos = {
-            x: master.origin[0],
-            y: master.origin[1]
+            x: master.origin[0] + 5,
+            y: master.origin[1] + 5
         };
-        this.velocity = 0;
+        //this.velocity = master.initialVelocity;
+        this.velocity = {
+            x: abs(master.initialVelocity) * -Math.sin(master.direction),
+            y: abs(master.initialVelocity) * Math.cos(master.direction)
+        };
     }
 
     deletaTime(){
@@ -87,15 +103,29 @@ class Particle{
     }
 
     updateVelocityVal(){
-        document.getElementById("velocity_val").innerHTML = this.velocity;
+        document.getElementById("velocity_val").innerHTML = this.velocity.y;
     }
 
     move(){
-        this.delta = -this.last + (this.last = window.performance.now());
-        
-        this.velocity += master.acceleration ;
+        /*     
+        this.velocity += master.acceleration;
         this.pos.x += this.velocity * -Math.sin(master.direction);
-        this.pos.y += (this.velocity  * Math.cos(master.direction)) + master.gravity;
+        this.pos.y += (this.velocity * Math.cos(master.direction)) + master.gravity;
+        */
+
+        // Forces pushing object forward
+        this.velocity.x += master.acceleration * -Math.sin(master.direction);
+        this.velocity.y += master.acceleration * Math.cos(master.direction);
+
+        // Repulsive forces
+        let airResistence = 0.1
+        if (this.velocity.x != 0){
+            this.velocity.x += airResistence * -Math.sin(master.direction);
+        }
+        this.velocity.y += -master.gravity * Math.cos(90);
+
+        this.pos.x += this.velocity.x;
+        this.pos.y += this.velocity.y;
     }
 
     get life(){
@@ -108,12 +138,11 @@ class Particle{
         ellipse(this.pos.x, this.pos.y, master.size);
 
         // DEBUG
-        //Draw line showing direction of particle
-        let DEBUG = false;
-        if(DEBUG){
+        if(DEBUG.checked){
             var x = this.pos.x;
             var y = this.pos.y;
             var sizeOfArrow = 50;
+            //Draw line showing direction of particle            
             line(x, y, x + sizeOfArrow * -Math.sin(master.direction), y + sizeOfArrow * Math.cos(master.direction));
         }
     }
