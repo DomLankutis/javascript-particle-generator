@@ -2,27 +2,32 @@
 <html lang="en">
     <head>
         <title>Js Site</title>
+        <link rel="stylesheet" type="text/css" href="./index.css">
     </head>
     <body>
-
-        <div id="sliders">
-            <span>Size of particles</span>
-            <input type="range" min="1" max = "100" value="20" step="0.1" class="slider" id="Size"><span id="Size_D">0</span>
-            <div></div>
-            <span>Acceleration of particles</span>
-            <input type="range" min="-0.001" max = ".0001" value="0" step="0.00001" class="slider" id="Acceleration"><span id="Acceleration_D">0</span>
-            <div></div>
-            <span>Vellocity of particles</span>
-            <input type="range" min="-1" max = "1" value="0" step="0.1" class="slider" id="Velocity"><span id="Velocity_D">0</span>
-            <div></div>
-            <span>Gravity</span>
-            <input type="range" min="-1" max = "1" value="0" step="0.01" class="slider" id="Gravity"><span id="Gravity_D">0</span>
-            <div></div>
-            <span>Direction particles</span>
-            <input type="range" min="0" max = "180" value="0" step="1" class="slider" id="Direction"><span id="Direction_D">0</span>
+        <div class="row">
+            <div id="sliders" class="block">
+                <h2>Settings</h2>
+                <span>Size of particles</span>
+                <input type="range" min="1" max = "100" value="20" step="0.1" class="slider" id="Size"><span id="Size_D">0</span>
+                <div></div>
+                <span>Acceleration of particles</span>
+                <input type="range" min="-0.01" max = ".01" value="0" step="0.00001" class="slider" id="Acceleration"><span id="Acceleration_D">0</span>
+                <div></div>
+                <span>Gravity</span>
+                <input type="range" min="-1" max = "2" value="0" step="0.01" class="slider" id="Gravity"><span id="Gravity_D">0</span>
+                <div></div>
+                <span>Direction particles</span>
+                <input type="range" min="0" max = "10" value="0" step="0.01" class="slider" id="Direction"><span id="Direction_D">0</span>
+            </div>
+            <div class="block">
+                <h2>Properties</h2>
+                <p>Velocity: <span id="velocity_val">value</span></p>
+            </div>
         </div>
+
         
     </body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.0/p5.js"></script>
-    <script src="Particle_Generator.js"></script>
+    <script src="./Particle_Generator.js"></script>
 </html>
