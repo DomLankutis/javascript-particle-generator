@@ -3,4 +3,4 @@ Particle generator with live editing
 
 To use this particle generator please visit:
 
-## [Live Particle Generator](domlankutis.github.io/javascript-particle-generator/)
+## [Live Particle Generator](https://domlankutis.github.io/javascript-particle-generator/)
