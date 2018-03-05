@@ -5,7 +5,7 @@ function setup(){
     frameRate(60);
     createCanvas(720, 480);    
     master = new Particles();
-    for (let i = 0; i <= 1; i++){
+    for (let i = 0; i <= 100; i++){
         particles.push(new Particle());
     }
     // Slider Div Daemon
@@ -46,6 +46,9 @@ function render(){
                 }else{ particles.splice(i, 1); } 
             }else{ particles[i].act(); }
         }
+        let sizeOfArrow = 50
+        line(master.origin[0] + 5, master.origin[1] + 5, master.origin[0] + 5 + sizeOfArrow * -Math.sin(master.direction + master.span), master.origin[1] + 5 + sizeOfArrow * Math.cos(master.direction + master.span));
+        line(master.origin[0] + 5, master.origin[1] + 5, master.origin[0] + 5 + sizeOfArrow * -Math.sin(master.direction - master.span), master.origin[1] + 5 + sizeOfArrow * Math.cos(master.direction - master.span));
     }
 }
 
@@ -66,6 +69,7 @@ class Particles{
         this.gravity = Number(document.getElementById("Gravity").value);       
         this.acceleration = Number(document.getElementById("Acceleration").value); 
         this.direction = Number(document.getElementById("Direction").value);
+        this.span = Number(document.getElementById("Span").value);        
         this.generateOutput();
     }
 
@@ -75,6 +79,7 @@ class Particles{
         document.getElementById("Gravity_D").innerHTML = "  " + this.gravity;
         document.getElementById("Acceleration_D").innerHTML = "  " + this.acceleration;
         document.getElementById("Direction_D").innerHTML = "  " + this.direction;
+        document.getElementById("Span_D").innerHTML = "  " + this.span / 2;
     }
 
     drawOrigin(){
@@ -85,15 +90,15 @@ class Particles{
 
 class Particle{
     constructor(){
-        this.t0 = Date.now();        
+        this.t0 = Date.now();
+        this.direction = master.direction + (Math.random() * master.span) - master.span / 2; // Some randomisation to the general direction   
         this.pos = {
             x: master.origin[0] + 5,
             y: master.origin[1] + 5
         };
-        //this.velocity = master.initialVelocity;
         this.velocity = {
-            x: abs(master.initialVelocity) * -Math.sin(master.direction),
-            y: abs(master.initialVelocity) * Math.cos(master.direction)
+            x: abs(master.initialVelocity) * -Math.sin(this.direction),
+            y: abs(master.initialVelocity) * Math.cos(this.direction)
         };
     }
 
@@ -107,20 +112,15 @@ class Particle{
     }
 
     move(){
-        /*     
-        this.velocity += master.acceleration;
-        this.pos.x += this.velocity * -Math.sin(master.direction);
-        this.pos.y += (this.velocity * Math.cos(master.direction)) + master.gravity;
-        */
 
         // Forces pushing object forward
-        this.velocity.x += master.acceleration * -Math.sin(master.direction);
-        this.velocity.y += master.acceleration * Math.cos(master.direction);
+        this.velocity.x += master.acceleration * -Math.sin(this.direction);
+        this.velocity.y += master.acceleration * Math.cos(this.direction);
 
         // Repulsive forces
-        let airResistence = 0.1
+        let airResistence = 0.1;
         if (this.velocity.x != 0){
-            this.velocity.x += airResistence * -Math.sin(master.direction);
+            this.velocity.x += airResistence * -Math.sin(this.direction);
         }
         this.velocity.y += -master.gravity * Math.cos(90);
 
@@ -143,7 +143,10 @@ class Particle{
             var y = this.pos.y;
             var sizeOfArrow = 50;
             //Draw line showing direction of particle            
-            line(x, y, x + sizeOfArrow * -Math.sin(master.direction), y + sizeOfArrow * Math.cos(master.direction));
+            //line(x, y, x + sizeOfArrow * -Math.sin(master.direction), y + sizeOfArrow * Math.cos(master.direction));
+            
+            
+
         }
     }
 
