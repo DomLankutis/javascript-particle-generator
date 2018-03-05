@@ -47,8 +47,8 @@ function render(){
             }else{ particles[i].act(); }
         }
         let sizeOfArrow = 50
-        line(master.origin[0] + 5, master.origin[1] + 5, master.origin[0] + 5 + sizeOfArrow * -Math.sin(master.direction + master.span), master.origin[1] + 5 + sizeOfArrow * Math.cos(master.direction + master.span));
-        line(master.origin[0] + 5, master.origin[1] + 5, master.origin[0] + 5 + sizeOfArrow * -Math.sin(master.direction - master.span), master.origin[1] + 5 + sizeOfArrow * Math.cos(master.direction - master.span));
+        line(master.origin[0] + 5, master.origin[1] + 5, master.origin[0] + 5 + sizeOfArrow * -Math.sin(master.direction + master.span / 2), master.origin[1] + 5 + sizeOfArrow * Math.cos(master.direction + master.span / 2));
+        line(master.origin[0] + 5, master.origin[1] + 5, master.origin[0] + 5 + sizeOfArrow * -Math.sin(master.direction - master.span / 2), master.origin[1] + 5 + sizeOfArrow * Math.cos(master.direction - master.span / 2));
     }
 }
 
@@ -143,10 +143,7 @@ class Particle{
             var y = this.pos.y;
             var sizeOfArrow = 50;
             //Draw line showing direction of particle            
-            //line(x, y, x + sizeOfArrow * -Math.sin(master.direction), y + sizeOfArrow * Math.cos(master.direction));
-            
-            
-
+            line(x, y, x + sizeOfArrow * -Math.sin(this.direction), y + sizeOfArrow * Math.cos(this.direction));
         }
     }
 
