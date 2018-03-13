@@ -1,10 +1,13 @@
+/// <reference path="./p5.global-mode.d.ts"/>
+
 let particles = [];
+let usedSections;
 let master;
 
 function setup(){
     frameRate(60);
-    createCanvas(1280, 720);    
-    master = new Particles();
+    createCanvas(1280, 720);
+    master = new Particles();  
     for (let i = 0; i <= 100; i++){
         particles.push(new Particle());
     }
@@ -34,10 +37,37 @@ function draw(){
     render();
 }
 
+function checkCollisions(keys){
+    for (let i = 0; i < keys.length; i++){
+        if (usedSections[keys[i]].length > 1){
+            let grid = usedSections[keys[i]]
+            for (let p1 = 0; p1 < grid.length; p1++){
+                for (let p2 = 0; p2 < grid.length; p2++){
+                    let pa1 = particles[grid[p1][2]]
+                    let pa2 = particles[grid[p2][2]]
+                    let distance = dist(pa1.pos.x, pa1.pos.y, pa2.pos.x, pa2.pos.y)
+                    if (distance <= master.size){
+                        let gridName = String("Grid" + Math.floor(pa1.pos.x / master.gridSize) + Math.floor(pa1.pos.y / master.gridSize))
+                        try{
+                            fill(255)
+                            rect(master.collisionGrid[gridName][0], master.collisionGrid[gridName][1], master.gridSize, master.gridSize)
+                        }                            
+                        finally{
+                            continue
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 function render(){
+    let keys
     // Particle Master Handler
     master.drawOrigin();
-
+    //master.drawGrid();              
+    usedSections = {};
     // Particle Handler
     if (particles.length != 0){
         for (let i = 0; i < particles.length; i++){
@@ -46,11 +76,22 @@ function render(){
                     particles[i] = new Particle();
                 }else{ particles.splice(i, 1); } 
             }else{ particles[i].act(); }
+        
+            let gridName = String("Grid" + Math.floor(particles[i].pos.x / master.gridSize) + Math.floor(particles[i].pos.y / master.gridSize))
+            let gridpos = master.collisionGrid[gridName];
+            keys = Object.keys(usedSections);
+            // Data stored as [Xpos, Ypos, partilceIndex]
+            if (keys.indexOf(gridName) > -1){
+                usedSections[gridName].push([particles[i].pos.x, particles[i].pos.y, i]);
+            }else{
+                usedSections[gridName] = [[particles[i].pos.x, particles[i].pos.y, i]];
+            }
         }
         let sizeOfArrow = 50;
         line(master.origin[0] + 5, master.origin[1] + 5, master.origin[0] + 5 + sizeOfArrow * -Math.sin(master.direction + master.span / 2), master.origin[1] + 5 + sizeOfArrow * Math.cos(master.direction + master.span / 2));
-        line(master.origin[0] + 5, master.origin[1] + 5, master.origin[0] + 5 + sizeOfArrow * -Math.sin(master.direction - master.span / 2), master.origin[1] + 5 + sizeOfArrow * Math.cos(master.direction - master.span / 2));
+        line(master.origin[0] + 5, master.origin[1] + 5, master.origin[0] + 5 + sizeOfArrow * -Math.sin(master.direction - master.span / 2), master.origin[1] + 5 + sizeOfArrow * Math.cos(master.direction - master.span / 2));        
     }
+    checkCollisions(keys)
 }
 
 function randomRange(max, min = 0){
@@ -61,6 +102,8 @@ function randomRange(max, min = 0){
 class Particles{
     constructor(){
         this.origin = [width / 2 , height / 2];
+        this.gridSize = 75;
+        this.createGrid();
 
         //Set min and max of particle direction
         document.getElementById("Direction").max = Math.PI * 2;
@@ -90,9 +133,27 @@ class Particles{
     drawOrigin(){
         rect(this.origin[0], this.origin[1], 10, 10);
     }
+
+    drawGrid(){
+        for (let grid in Object.entries(this.collisionGrid)){
+            let gridpos = Object.entries(this.collisionGrid)[grid][1];
+            stroke(0);
+            line(gridpos[0], 0, gridpos[0], height);
+            line(0, gridpos[1], width, gridpos[1]);
+        }
+    }
+
+    createGrid(){
+        this.collisionGrid = {};
+        for (let w = 0; w <= width; w += this.gridSize){
+            for (let h = 0; h <= height; h += this.gridSize){
+                this.collisionGrid["Grid" + (w / this.gridSize) + (h / this.gridSize)] = [w, h];
+            }
+        }
+    }
 }
 
-
+            
 class Particle{
     constructor(){
         this.t0 = Date.now();
@@ -132,6 +193,7 @@ class Particle{
 
         this.pos.x += this.velocity.x;
         this.pos.y += this.velocity.y;
+
     }
 
     get life(){
@@ -161,7 +223,7 @@ class Particle{
             var x = this.pos.x;
             var y = this.pos.y;
             var sizeOfArrow = 50;
-            //Draw line showing direction of particle            
+            //Draw line showing direction of particle   
             line(x, y, x + sizeOfArrow * -Math.sin(this.direction), y + sizeOfArrow * Math.cos(this.direction));
         }
     }
