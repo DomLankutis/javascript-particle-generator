@@ -8,7 +8,7 @@ function setup(){
     frameRate(60);
     createCanvas(1280, 720);
     master = new Particles();  
-    for (let i = 0; i <= 100; i++){
+    for (let i = 0; i <= 500; i++){
         particles.push(new Particle());
     }
     // Slider Div Daemon
@@ -43,17 +43,22 @@ function checkCollisions(keys){
             let grid = usedSections[keys[i]]
             for (let p1 = 0; p1 < grid.length; p1++){
                 for (let p2 = 0; p2 < grid.length; p2++){
-                    let pa1 = particles[grid[p1][2]]
-                    let pa2 = particles[grid[p2][2]]
-                    let distance = dist(pa1.pos.x, pa1.pos.y, pa2.pos.x, pa2.pos.y)
-                    if (distance <= master.size){
-                        let gridName = String("Grid" + Math.floor(pa1.pos.x / master.gridSize) + Math.floor(pa1.pos.y / master.gridSize))
-                        try{
-                            fill(255)
-                            rect(master.collisionGrid[gridName][0], master.collisionGrid[gridName][1], master.gridSize, master.gridSize)
-                        }                            
-                        finally{
-                            continue
+                    if (p1 != p2){
+                        let pa1 = particles[grid[p1][2]]
+                        let pa2 = particles[grid[p2][2]]
+                        let distance = dist(pa1.pos.x, pa1.pos.y, pa2.pos.x, pa2.pos.y)
+                        if (distance <= master.size){
+                            let gridName = String("Grid" + Math.floor(pa1.pos.x / master.gridSize) + Math.floor(pa1.pos.y / master.gridSize))
+                            try{
+                                fill(255)
+                                //rect(master.collisionGrid[gridName][0], master.collisionGrid[gridName][1], master.gridSize, master.gridSize)
+                                pa1.isColliding = true
+                                pa2.isColliding = true
+                                
+                            }                            
+                            finally{
+                                continue
+                            }
                         }
                     }
                 }
@@ -102,7 +107,7 @@ function randomRange(max, min = 0){
 class Particles{
     constructor(){
         this.origin = [width / 2 , height / 2];
-        this.gridSize = 75;
+        this.gridSize = 60;
         this.createGrid();
 
         //Set min and max of particle direction
@@ -172,6 +177,7 @@ class Particle{
             b: randomRange(255)
         };
         this.colour = color(this.colours.r, this.colours.g, this.colours.b);
+        this.isColliding = false;
         
     }
 
@@ -210,7 +216,11 @@ class Particle{
             this.colours.b += randomRange(max, -max);
             this.colour = color(this.colours.r, this.colours.g, this.colours.b);        
         }
-        fill(this.colour);        
+        if (this.isColliding){
+            fill(color(255,0,0))
+        }else{
+            fill(this.colour); 
+        }      
     }
 
     draw(){
@@ -232,5 +242,6 @@ class Particle{
         this.move();
         this.draw();
         this.updateVelocityVal();
+        this.isColliding = false
     }
 }
