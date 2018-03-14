@@ -8,7 +8,7 @@ function setup(){
     frameRate(60);
     createCanvas(1280, 720);
     master = new Particles();  
-    for (let i = 0; i <= 500; i++){
+    for (let i = 0; i <= 100; i++){
         particles.push(new Particle());
     }
     // Slider Div Daemon
