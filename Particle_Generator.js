@@ -40,21 +40,17 @@ function draw(){
 function checkCollisions(keys){
     for (let i = 0; i < keys.length; i++){
         if (usedSections[keys[i]].length > 1){
-            let grid = usedSections[keys[i]]
+            let grid = usedSections[keys[i]];
             for (let p1 = 0; p1 < grid.length; p1++){
                 for (let p2 = 0; p2 < grid.length; p2++){
                     if (p1 != p2){
-                        let pa1 = particles[grid[p1][2]]
-                        let pa2 = particles[grid[p2][2]]
-                        let distance = dist(pa1.pos.x, pa1.pos.y, pa2.pos.x, pa2.pos.y)
+                        let pa1 = particles[grid[p1][2]];
+                        let pa2 = particles[grid[p2][2]];
+                        let distance = dist(pa1.pos.x, pa1.pos.y, pa2.pos.x, pa2.pos.y);
                         if (distance <= master.size){
-                            let gridName = String("Grid" + Math.floor(pa1.pos.x / master.gridSize) + Math.floor(pa1.pos.y / master.gridSize))
                             try{
-                                fill(255)
-                                //rect(master.collisionGrid[gridName][0], master.collisionGrid[gridName][1], master.gridSize, master.gridSize)
                                 pa1.isColliding = true
                                 pa2.isColliding = true
-                                
                             }                            
                             finally{
                                 continue
@@ -67,11 +63,30 @@ function checkCollisions(keys){
     }
 }
 
+function checkPosition(target){
+    let gridNames = [];
+    let pointSize = master.size / 2;
+    gridNames.push(String("Grid" + Math.floor((target.pos.x + pointSize) / master.gridSize) + Math.floor((target.pos.y + pointSize) / master.gridSize)));
+    gridNames.push(String("Grid" + Math.floor((target.pos.x + pointSize) / master.gridSize) + Math.floor((target.pos.y - pointSize) / master.gridSize)));
+    gridNames.push(String("Grid" + Math.floor((target.pos.x - pointSize) / master.gridSize) + Math.floor((target.pos.y + pointSize) / master.gridSize)));
+    gridNames.push(String("Grid" + Math.floor((target.pos.x - pointSize) / master.gridSize) + Math.floor((target.pos.y - pointSize) / master.gridSize)));
+
+    let used = [];
+    for (let i = 0; i < gridNames.length; i++){
+        if (used.includes(gridNames[i])){
+            gridNames.splice(i);
+        }else{
+            used.push(gridNames[i])
+        }
+    }
+    return gridNames;
+}
+
 function render(){
     let keys
+    let gridNames
     // Particle Master Handler
     master.drawOrigin();
-    //master.drawGrid();              
     usedSections = {};
     // Particle Handler
     if (particles.length != 0){
@@ -81,16 +96,18 @@ function render(){
                     particles[i] = new Particle();
                 }else{ particles.splice(i, 1); } 
             }else{ particles[i].act(); }
-        
-            let gridName = String("Grid" + Math.floor(particles[i].pos.x / master.gridSize) + Math.floor(particles[i].pos.y / master.gridSize))
-            let gridpos = master.collisionGrid[gridName];
-            keys = Object.keys(usedSections);
-            // Data stored as [Xpos, Ypos, partilceIndex]
-            if (keys.indexOf(gridName) > -1){
-                usedSections[gridName].push([particles[i].pos.x, particles[i].pos.y, i]);
-            }else{
-                usedSections[gridName] = [[particles[i].pos.x, particles[i].pos.y, i]];
+            gridNames = checkPosition(particles[i]);
+            keys = Object.keys(usedSections);            
+            gridNames.forEach(function(gridName){
+                let gridpos = master.collisionGrid[gridName];
+                // Data stored as [Xpos, Ypos, partilceIndex]
+                if (keys.indexOf(gridName) > -1){
+                    usedSections[gridName].push([particles[i].pos.x, particles[i].pos.y, i]);
+                }else{
+                    usedSections[gridName] = [[particles[i].pos.x, particles[i].pos.y, i]];
             }
+            });
+            
         }
         let sizeOfArrow = 50;
         line(master.origin[0] + 5, master.origin[1] + 5, master.origin[0] + 5 + sizeOfArrow * -Math.sin(master.direction + master.span / 2), master.origin[1] + 5 + sizeOfArrow * Math.cos(master.direction + master.span / 2));
